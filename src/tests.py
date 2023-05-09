@@ -4,7 +4,13 @@ from unittest import TestCase, main
 
 
 class Tests(TestCase):
+    def test_group_existence(self):
+        args = AnyArgs()
+        self.assertIsNone(args.groups.get("Group That doesn't exist"))
 
+        args.add_group("Group that does exist")
+        self.assertIsNotNone(args.groups.get("Group that does exist"))
+        
     def test_argument_adding(self):
         assert_text = "You should be able to add & access arguments set in {0} from {1}"
 
@@ -28,6 +34,7 @@ class Tests(TestCase):
         
         self.assertIsNotNone(group.get_argument("Arg from AnyArgs"),
                       assert_text.format("AnyArgs", "Group"))
+
 
 
 
