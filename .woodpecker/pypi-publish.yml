@@ -1,0 +1,16 @@
+pipeline:
+  build:
+    image: python:3.10
+    commands:
+      - python3 -m pip install --upgrade build setuptools
+      - python3 -m build
+  
+  publish:
+    image: python:3.10
+    secrets: [ pypi_password_or_token ]
+    commands:
+      - python3 -m pip install --upgrade twine
+      - python3 -m twine upload dist/* -u __token__ -p $PYPI_PASSWORD_OR_TOKEN
+
+when:
+  event: [ tag ]
