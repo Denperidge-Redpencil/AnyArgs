@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from configparser import ConfigParser
 from typing import Dict, List
+from os import environ
+from re import findall, RegexFlag
 
 from .typestrings import TYPESTRING_BOOLEAN, TYPESTRING_STRING
 
@@ -33,11 +35,22 @@ class Group:
         
         """
         
+        # If no CLI flags are defined, auto generate
+        if len(cli_flags) < 1:
+            # e.g. -
+            short_flag = "-" + "".join(findall(r"^\S|[ -]\S", name.lower()))
+            long_flag = "--" + name.lower().replace(" ", "-")
+            cli_flags += [short_flag, long_flag]
 
-        self.arg_group.add_argument(*cli_flags,
-                                    dest=name,
-                                    help=help_text)
-    
+        try:
+            self.arg_group.add_argument(*cli_flags,
+                                        dest=name,
+                                        help=help_text)
+        except ValueError as e:
+            print("[ERR] ValueError raised when adding argument. Double check that you're not adding duplicate cli_flags")
+            raise e
+        
+        # If a default is defines, save it
         if default is not None:
             self.defaults[name.lower()] = default
 
@@ -52,17 +65,32 @@ class Group:
         args = self.args
         return getattr(args, arg_id) if hasattr(args, arg_id) else None
 
+    def _get_env_value(self, arg_id: str):
+        return environ.get(arg_id)
+
 
     def get_argument(self, human_readable_name: str):
-        """Gets the arg, whether it be from the config file or CLI"""
-        # Get the value from cli if defined. Cli > conf
-        value = self._get_argparse_value(human_readable_name.lower())
-        # If it's undefined in the CLI, check if conf can be used
-        if value is None:
-            value = self._get_conf_value(human_readable_name.lower())
+        """
+        Gets the arg, no matter where it comes from
 
+        Priority:
+        - Highest: CLI arg
+        - Middle: env variable/.env
+        - Lower: conf file
+        - Fallback: default
+        """
+
+        # CLI arg
+        value = self._get_argparse_value(human_readable_name.lower())
+        # env variable/.env
         if value is None:
-            value = self.defaults[human_readable_name.lower()]
+            value = self._get_env_value(human_readable_name)
+        # conf file
+        if value is None:
+            value = self._get_conf_value(human_readable_name)
+        # default
+        if value is None:
+            value = self.defaults.get(human_readable_name.lower(), None)
 
         if False:
             # If it should be saved, do that

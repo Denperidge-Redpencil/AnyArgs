@@ -1,6 +1,7 @@
-from .AnyArgs.AnyArgs import AnyArgs
+from .AnyArgs import AnyArgs
 from unittest import TestCase, main
 
+from os import system, getcwd, remove
 
 
 class Tests(TestCase):
@@ -35,6 +36,26 @@ class Tests(TestCase):
         self.assertIsNotNone(group.get_argument("Arg from AnyArgs"),
                       assert_text.format("AnyArgs", "Group"))
 
+
+
+
+    def test_load_arg_from_conf(self):
+        args = AnyArgs()
+        args.add_group("Arguments").add_argument("Argument")
+
+        
+        self.assertIsNone(args.get_argument("Arguments", "Argument"))
+
+        conf_path = getcwd() + "/args.conf"
+
+        with open(conf_path, "w", encoding="UTF-8") as file:
+            file.write("[Arguments]\nArgument = Set")
+        
+        args.load_args()
+
+        self.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
+
+        remove(conf_path)
 
 
 
