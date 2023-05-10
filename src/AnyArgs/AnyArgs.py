@@ -24,6 +24,17 @@ class AnyArgs:
         self.groups: Dict[str, Group] = dict()
 
 
+    def __str__(self) -> str:
+        output_str = "Args:\n"
+        for group_name in self.groups:
+            output_str += "\t" + group_name + "\n"
+            
+            group = self.groups[group_name]
+            for arg_name in group.set_arg_names:
+                output_str += f"\t- {arg_name}: {group.get_argument(arg_name)}\n"
+        
+        return output_str
+
     """GROUP & ARG DEFINITIONS"""
     def add_group(self, group_name):
         """"""
@@ -95,6 +106,17 @@ class AnyArgs:
                 self._determine_args_type_and_load(filepath)
         
 
+    """SAVING"""
+
+
+    def save_to_conf(self, output_filepath):
+        for group_name in self.groups:
+            group = self.groups[group_name]
+            for arg_name in group.set_arg_names:
+                group._set_conf_value(arg_name, group.get_argument(arg_name))
+
+        with open(output_filepath, "w", encoding="UTF-8") as conf:
+            self._config_parser.write(conf)
             
 
             
