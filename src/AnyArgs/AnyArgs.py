@@ -39,7 +39,7 @@ class AnyArgs:
                      help_text: str="", 
                      cli_flags=[], 
                      default=None):
-        return self.groups[group_name].add_argument(
+        return self.get_group(group_name).add_argument(
             name=argument_name, 
             typestring=typestring, 
             help_text=help_text, 
@@ -47,9 +47,6 @@ class AnyArgs:
             default=default)
     
     def get_group(self, group_name) -> Union[Group, None]:
-        print(self.groups)
-        print(group_name)
-        print("---")
         return self.groups.get(group_name, None)
 
     def get_argument(self, group_name, argument_name):
@@ -84,6 +81,7 @@ class AnyArgs:
 
     def load_args(self, load_from_cwd = True, filepaths: Union[str, List[str]]= []):
         """Load data from passed file paths, if they exist"""
+        self._argument_parser.parse_args()
         if isinstance(filepaths, str):
             filepaths = [filepaths]
         
