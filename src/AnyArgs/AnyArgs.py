@@ -7,7 +7,7 @@ from glob import glob
 from typing import Dict, List, Union
 from pathlib import Path
 
-from .Group import Group
+from .Group import Group, conf_id_from_string, env_id_from_string
 
 
 def _glob_from_cwd(glob_string: str):
@@ -108,16 +108,38 @@ class AnyArgs:
 
     """SAVING"""
 
+    def save_to(self, conf_filepath=None, env_filepath=None):
+        save_to_conf = conf_filepath is not None
+        save_to_env = env_filepath is not None
+        if save_to_env:
+            env_contents = ""
 
-    def save_to_conf(self, output_filepath):
         for group_name in self.groups:
             group = self.groups[group_name]
-            for arg_name in group.set_arg_names:
-                group._set_conf_value(arg_name, group.get_argument(arg_name))
 
-        with open(output_filepath, "w", encoding="UTF-8") as conf:
-            self._config_parser.write(conf)
+            if save_to_env:
+                env_contents += "# " + group_name + "\n"
+
+            for arg_name in group.set_arg_names:
+                arg_value = group.get_argument(arg_name)
+                if save_to_conf:
+                    key = conf_id_from_string(arg_name)
+                    group._set_conf_value(key, arg_value)
+                if save_to_env:
+                    key = env_id_from_string(arg_name)
+                    env_contents += f"{key}={arg_value}\n"
             
+            if save_to_env:
+                env_contents += "\n"
+
+        if save_to_conf:
+            with open(conf_filepath, "w", encoding="UTF-8") as conf:
+                    self._config_parser.write(conf)
+        
+        if save_to_env:
+            with open(env_filepath, "w", encoding="UTF-8") as env:
+                env.write(env_contents)
+
 
             
             

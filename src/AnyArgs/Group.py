@@ -6,14 +6,17 @@ from re import findall, sub
 
 from .argtypes import ARGTYPE_BOOLEAN, ARGTYPE_STRING
 
-def conf_id_from_string(name: str):
+def conf_id_from_string(string: str):
     
     #words = findall(r"[a-zA-Z]*", name)
     #id = ""
     #for word in words:
      #   id += word.capitalize()
-    return "".join(findall("[a-zA-Z]*", name))
-    
+    return "".join(findall(r"[a-zA-Z]*", string))
+
+def env_id_from_string(string: str):
+    return "_".join(findall(r"[a-zA-Z]*", string))
+
 
 class Group:
     def __init__(self, argument_parser: ArgumentParser, config_parser: ConfigParser, group_name: str) -> None:
@@ -98,7 +101,6 @@ class Group:
 
     def _set_conf_value(self, arg_id: str, value: any):
         arg_id = conf_id_from_string(arg_id)
-        print(arg_id)
         value = str(value)
         self.config_parser.set(self.conf_group, arg_id, value)
 
@@ -107,7 +109,13 @@ class Group:
         return getattr(args, arg_id) if hasattr(args, arg_id) else None
 
     def _get_env_value(self, arg_id: str):
+        arg_id = env_id_from_string(arg_id)
         return environ.get(arg_id, None)
+
+    def _set_env_value(self, arg_id: str, value:any):
+        arg_id = env_id_from_string(arg_id)
+        value = str(value)
+        environ.update(arg_id, value)
 
 
     def get_argument(self, human_readable_name: str):
