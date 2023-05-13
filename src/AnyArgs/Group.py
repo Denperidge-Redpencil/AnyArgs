@@ -15,7 +15,11 @@ def conf_id_from_string(string: str):
     return "".join(findall(r"[a-zA-Z]*", string))
 
 def env_id_from_string(string: str):
-    return "_".join(findall(r"[a-zA-Z]*", string))
+    id = ""
+    for word in findall(r"[a-zA-Z]*", string):
+        id += word.capitalize()
+    return id
+    #return sub(r"\W{1,}", "_", string)
 
 
 class Group:
@@ -51,13 +55,13 @@ class Group:
         self.set_arg_names.append(name)
         # simply using cli_flags or flags = cli_flags breaks it idk who cares
         flags = [flag for flag in cli_flags]
-        if typestring == ARGTYPE_STRING:
-            action = None
         if typestring == ARGTYPE_BOOLEAN:
             action = "store_true"
             if default is None:
                 default = False
-
+        else:
+            # Argtype string and default
+            action = "store"
         
         
         # If no CLI flags are defined, auto generate

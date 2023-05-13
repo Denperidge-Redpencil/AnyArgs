@@ -3,6 +3,21 @@ from unittest import TestCase, main
 
 from os import system, getcwd, remove
 
+def test_load_from_file(test_class, file_path, file_content):
+    if "/" not in file_path:
+        file_path = getcwd() + "/" + file_path
+
+    args = AnyArgs()
+    args.add_group("Arguments").add_argument("Argument")
+    
+    test_class.assertIsNone(args.get_argument("Arguments", "Argument"))
+    with open(file_path, "w", encoding="UTF-8") as file:
+        file.write(file_content)
+    
+    args.load_args()
+    test_class.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
+    remove(file_path)
+
 
 class Tests(TestCase):
     def test_group_existence(self):
@@ -40,22 +55,10 @@ class Tests(TestCase):
 
 
     def test_load_arg_from_conf(self):
-        args = AnyArgs()
-        args.add_group("Arguments").add_argument("Argument")
-
-        
-        self.assertIsNone(args.get_argument("Arguments", "Argument"))
-
-        conf_path = getcwd() + "/args.conf"
-
-        with open(conf_path, "w", encoding="UTF-8") as file:
-            file.write("[Arguments]\nArgument = Set")
-        
-        args.load_args()
-
-        self.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
-
-        remove(conf_path)
+        test_load_from_file(self, "args.conf", "[Arguments]\nArgument = Set")
+    
+    def test_load_arg_from_env(self):
+        test_load_from_file(self, ".env", "Argument=Set")
 
 
 
