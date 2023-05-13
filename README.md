@@ -5,9 +5,10 @@ Get script arguments from the CLI, .conf files, environment variables and/or .en
 
 | CLI  | .conf | .env | env vars | Functionality | 
 | ---- | ----- | ---- | -------- | ------------- |
-|  ✅  |  ✅   |  ❔  |    ❔    | Add groups & arguments everywhere at once |
-|  ❔  |  ❔   |  ❔  |    ❔    | Get the arguments, no matter where they're set |
-|  ❔  |  ❔   |  ❔  |    ❔    | Save the arguments to another medium, no matter where they're set |
+|  ✅  |  ✅   |  ✅  |    ✅    | Add groups & arguments everywhere at once        |
+|  ✅  |  ✅   |  ✅  |    ✅    | Get the arguments, no matter where they're set   |
+|  ❌  |  ✅   |  ✅  |    ❔    | Save args to a file                              |
+|  ❔  |  ❔   |  ❔  |    ❔    | Set list type/duplicate args                     |
 
 
 ✅: Implemented
