@@ -12,6 +12,7 @@ Get script arguments from the CLI, .conf files, environment variables and/or .en
 
 
 ✅: Implemented
+❕: Implemented in a quirky little way
 ❔: Planned
 ❌: Not implemented
 
@@ -19,6 +20,11 @@ Get script arguments from the CLI, .conf files, environment variables and/or .en
 ### Usage
 ```python
 # TODO
+```
+
+### Run tests
+```bash
+python3 -m src.tests
 ```
 
 ### Install from pip

@@ -1,0 +1,7 @@
+pipeline:
+  test:
+    image: python:3.9
+    commands:
+      - python3 -m pip install -r requirements.txt
+      - python3 -m src.tests
+  
