@@ -7,23 +7,19 @@ from re import findall, sub
 from . import ARGTYPE_BOOLEAN, ARGTYPE_STRING, ARGTYPE_LIST
 
 def conf_id_from_string(string: str):
-    
-    #words = findall(r"[a-zA-Z]*", name)
-    #id = ""
-    #for word in words:
-     #   id += word.capitalize()
-    return "".join(findall(r"[a-zA-Z]*", string))
-
-def env_id_from_string(string: str):
     id = ""
-    for word in findall(r"[a-zA-Z]*", string):
+    for word in findall(r"[a-zA-Z0-9]+", string):
         id += word.capitalize()
     return id
-    #return sub(r"\W{1,}", "_", string)
+
+def env_id_from_string(string: str):
+    """Convert a string to an environment ID, based on examples provided at https://www.dotenv.org/docs/security/env.html"""
+    return "_".join(findall(r"[a-zA-Z0-9]+", string)).upper()
 
 
 class Group:
     def __init__(self, argument_parser: ArgumentParser, config_parser: ConfigParser, group_name: str) -> None:
+        """Defines a group for arguments"""
         self.group_name = group_name
         self.argument_parser = argument_parser
         self.arg_group = self.argument_parser.add_argument_group(self.group_name)
