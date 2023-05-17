@@ -124,6 +124,7 @@ class AnyArgs:
                     key = env_id_from_string(arg_name)
                     env_contents += f"{key}={arg_value}\n"
                 if env_vars:
+                    key = env_id_from_string(arg_name)
                     environ[key] = arg_value
 
                 

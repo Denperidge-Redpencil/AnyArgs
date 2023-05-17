@@ -18,7 +18,32 @@ def test_load_from_file(test_class, file_path, file_content=None):
     
     args.load_args()
     test_class.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
-    remove(file_path)
+
+    cleanup_test()
+
+
+def test_save_to(test_class, conf=False, env_file=False):
+    args = setup_test(add_default_arg=True)
+
+    args.load_args()
+    # By default, None
+    test_class.assertIsNone(args.get_argument("Arguments", "Argument"))
+
+    # Now hypothetically what if it was set
+    args.get_group("Arguments")._set_conf_value("Argument", "Set")
+
+    # Save that Set to ...
+    if conf:
+        args.save_to(conf_filepath="args.conf")
+    if env_file:
+        args.save_to(env_filepath=".env")
+
+    # Reset AnyArgs
+    args = setup_test(add_default_arg=True)
+    # By default, None
+    test_class.assertIsNone(args.get_argument("Arguments", "Argument"))
+    args.load_args()
+    test_class.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
 
     cleanup_test()
 
@@ -31,6 +56,8 @@ def setup_test(add_default_arg = True) -> AnyArgs:
 def cleanup_test():
     if path.exists("args.conf"):
         remove("args.conf")
+    if path.exists(".env"):
+        remove(".env")
     if "Argument" in environ.keys():
         environ.pop("Argument")
 
@@ -94,30 +121,23 @@ class Tests(TestCase):
     
 
     def test_save_to_conf(self):
+        test_save_to(self, conf=True)
+        
+    def test_save_to_env_file(self):
+        test_save_to(self, env_file=True)
+    
+    def test_save_to_env_vars(self):
         args = setup_test(add_default_arg=True)
-
-        args.load_args()
-        # By default, None
-        self.assertIsNone(args.get_argument("Arguments", "Argument"))
-
-        # Now hypothetically what if it was set
         args.get_group("Arguments")._set_conf_value("Argument", "Set")
 
-        # Save that Set to the conf file
-        args.save_to(conf_filepath="args.conf")
+        self.assertIsNone(environ.get("Argument", None))
+        args.get_group("Arguments")._set_conf_value("Argument", "Set")
+        self.assertIsNone(environ.get("Argument", None))
         
-        # Reset AnyArgs
-        args = setup_test(add_default_arg=True)
-        # By default, None
-        self.assertIsNone(args.get_argument("Arguments", "Argument"))
-        args.load_args()
-        self.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
+        args.save_to(env_vars=True)
+        self.assertEqual(environ.get("Argument", None), "Set")
 
-        
         cleanup_test()
-
-        
-
         
 
 
