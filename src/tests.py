@@ -2,6 +2,7 @@ from .AnyArgs import AnyArgs
 from unittest import TestCase, main
 
 from os import system, getcwd, remove
+from os import environ
 
 def test_load_from_file(test_class, file_path, file_content):
     if "/" not in file_path:
@@ -54,13 +55,25 @@ class Tests(TestCase):
 
 
 
-    def test_load_arg_from_conf(self):
+    def test_load_arg_from_file_conf(self):
         test_load_from_file(self, "args.conf", "[Arguments]\nArgument = Set")
     
-    def test_load_arg_from_env(self):
+    def test_load_arg_from_file_env(self):
         test_load_from_file(self, ".env", "Argument=Set")
+    
+    def test_load_from_env_vars(self):
+        args = AnyArgs()
+        args.add_group("Arguments").add_argument("Argument")
 
+        environ.pop("Argument")
+        args.load_args()
+        
+        self.assertIsNone(args.get_argument("Arguments", "Argument"))
 
+        environ["Argument"] = "Set"
+
+        args.load_args()
+        self.assertEqual(args.get_argument("Arguments", "Argument"), "Set")
 
 if __name__ == "__main__":
     main()

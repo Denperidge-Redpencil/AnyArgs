@@ -4,7 +4,7 @@ from typing import Dict, List
 from os import environ
 from re import findall, sub
 
-from .argtypes import ARGTYPE_BOOLEAN, ARGTYPE_STRING
+from . import ARGTYPE_BOOLEAN, ARGTYPE_STRING, ARGTYPE_LIST
 
 def conf_id_from_string(string: str):
     
@@ -24,11 +24,12 @@ def env_id_from_string(string: str):
 
 class Group:
     def __init__(self, argument_parser: ArgumentParser, config_parser: ConfigParser, group_name: str) -> None:
+        self.group_name = group_name
         self.argument_parser = argument_parser
-        self.arg_group = self.argument_parser.add_argument_group(group_name)
+        self.arg_group = self.argument_parser.add_argument_group(self.group_name)
         
         self.config_parser = config_parser
-        self.conf_group = group_name
+        self.conf_group = self.group_name
         self.config_parser.add_section(self.conf_group)
 
         self.cli_flags = ["-h"]
@@ -59,6 +60,8 @@ class Group:
             action = "store_true"
             if default is None:
                 default = False
+        elif typestring == ARGTYPE_LIST:
+            action = "append"
         else:
             # Argtype string and default
             action = "store"
@@ -80,12 +83,14 @@ class Group:
             
 
         try:
-            self.arg_group.add_argument(*flags,
+            arg = self.arg_group.add_argument(*flags,
                                         dest=name,
                                         action=action,
                                         help=help_text,
                                         default=None)  # Set Default none, as defaults are handled by AnyArgs
-        
+            if typestring == ARGTYPE_LIST:
+                arg.nargs = "*"
+
             self.cli_flags += flags
         except ValueError as e:
             print("[ERR] ValueError raised when adding argument. Double check that you're not adding duplicate cli_flags")
@@ -151,3 +156,15 @@ class Group:
             pass
             
         return value
+    
+    def __str__(self) -> str:
+        output_str = "\t" + self.group_name + "\n"
+        
+        for arg_name in self.set_arg_names:
+            output_str += f"\t- {arg_name}: {self.get_argument(arg_name)}\n"
+        return output_str
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+
+        

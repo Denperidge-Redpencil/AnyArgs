@@ -7,7 +7,7 @@ from glob import glob
 from typing import Dict, List, Union
 from pathlib import Path
 
-from .Group import Group, conf_id_from_string, env_id_from_string
+from . import Group, conf_id_from_string, env_id_from_string
 
 
 def _glob_from_cwd(glob_string: str):
@@ -27,12 +27,7 @@ class AnyArgs:
     def __str__(self) -> str:
         output_str = "Args:\n"
         for group_name in self.groups:
-            output_str += "\t" + group_name + "\n"
-            
-            group = self.groups[group_name]
-            for arg_name in group.set_arg_names:
-                output_str += f"\t- {arg_name}: {group.get_argument(arg_name)}\n"
-        
+            output_str += str(self.groups[group_name])
         return output_str
 
     """GROUP & ARG DEFINITIONS"""
