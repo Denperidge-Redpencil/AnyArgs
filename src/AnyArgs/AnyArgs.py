@@ -42,13 +42,13 @@ class AnyArgs:
                      group_name:str, 
                      argument_name: str, 
                      typestring: str="", 
-                     help_text: str="", 
+                     help: str="", 
                      cli_flags=[], 
                      default=None):
         return self.get_group(group_name).add_argument(
             name=argument_name, 
             typestring=typestring, 
-            help_text=help_text, 
+            help=help, 
             cli_flags=cli_flags,
             default=default)
     

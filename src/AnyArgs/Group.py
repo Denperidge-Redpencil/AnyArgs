@@ -45,7 +45,7 @@ class Group:
 
     def add_argument(self, name: str, 
                      typestring: str=ARGTYPE_STRING, 
-                     help_text: str="", 
+                     help: str="", 
                      cli_flags: List = [], 
                      default: any = None):
         """
@@ -86,7 +86,7 @@ class Group:
             arg = self.arg_group.add_argument(*flags,
                                         dest=name,
                                         action=action,
-                                        help=help_text,
+                                        help=help,
                                         default=None)  # Set Default none, as defaults are handled by AnyArgs
             if typestring == ARGTYPE_LIST:
                 arg.nargs = "*"
