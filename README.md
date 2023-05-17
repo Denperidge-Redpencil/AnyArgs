@@ -7,14 +7,16 @@ Get script arguments from the CLI, .conf files, environment variables and/or .en
 | ---- | ----- | ---- | -------- | ------------- |
 |  ✅  |  ✅   |  ✅  |    ✅    | Add groups & arguments everywhere at once        |
 |  ✅  |  ✅   |  ✅  |    ✅    | Load arguments, no matter where they're set      |
-|  ❌  |  ✅   |  ✅  |    ✅    | Save/export args                                 |
+|  ❌  |  ✅   |  ✅  | ❕[*](#save-to-env-vars) | Save/export args                  |
 |  ❔  |  ❔   |  ❔  |    ❔    | Set list type/duplicate args                     |
 
 
 ✅: Implemented
-❕: Implemented in a quirky little way
+❕: Implemented with caveats
 ❔: Planned
 ❌: Not implemented
+
+*: [Save/export to env vars](#save-to-env-vars)
 
 ## How-To
 ### (Project) Install from pip
@@ -65,7 +67,38 @@ args.add_group("Config").add_argument("Username", cli_flags=["--username", "--lo
 args.load_args()
 ```
 
-### (Code) Outputting 
+### (Code) Exporting/saving args
+```python
+# index.py
+args = AnyArgs()
+args.add_group("Config").add_argument("Username", help="Username for logging in")
+args.load_args()
+args.save_to(conf_filepath="conf.conf", env_filepath=".env", env_vars=True)  # To only save to one or two of these, simply omit the other values
+```
+<details>
+<summary>Output:</summary>
+
+.env
+```conf
+# Login
+Username=Denperidge
+```
+
+conf.conf
+```conf
+[Login]
+username = Denperidge
+```
+
+Env_vars:
+```python
+print("Env: " + environ.get("Username", None))
+# Output:
+# Env: Denperidge
+```
+
+</details>
+
 
 ### (Project) Clone & run tests
 ```bash
@@ -158,6 +191,10 @@ Save Configuration:
 - Short-flag ignores non-letters (~~`.`~~) and uses the first letters split by spaces (` `) 
 
 
+## Discussions
+### Save to env vars
+First of all: apparently on MacOSX & FreeBSD modifying environ is also [bad news](https://docs.python.org/3/library/os.html#os.environ).
 
+That aside you should note that this - due to limitations of Python (at least without wild workarounds) - is a bit limited. The environment variables should normally get modified for the Python script and its child processes, but not outside of it. This is because Python environ is not persistent outside of the python script runtime.
 
-
+You can view some explanations and possible workarounds [here](https://stackoverflow.com/a/716046) and the more out of date Python2 discussion [here](https://stackoverflow.com/questions/5971312/how-to-set-environment-variables-in-python).
