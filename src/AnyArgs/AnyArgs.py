@@ -103,7 +103,7 @@ class AnyArgs:
 
     """SAVING"""
 
-    def save_to(self, conf_filepath=None, env_filepath=None):
+    def save_to(self, conf_filepath=None, env_filepath=None, env_vars=False):
         save_to_conf = conf_filepath is not None
         save_to_env = env_filepath is not None
         if save_to_env:
@@ -123,9 +123,10 @@ class AnyArgs:
                 if save_to_env:
                     key = env_id_from_string(arg_name)
                     env_contents += f"{key}={arg_value}\n"
-            
-            if save_to_env:
-                env_contents += "\n"
+                if env_vars:
+                    environ[key] = arg_value
+
+                
 
         if save_to_conf:
             with open(conf_filepath, "w", encoding="UTF-8") as conf:
