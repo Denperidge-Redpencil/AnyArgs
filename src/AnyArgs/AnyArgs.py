@@ -68,8 +68,7 @@ class AnyArgs:
         self._config_parser.read(filepath)
     
     def _load_env_file(self, filepath):
-        #load_dotenv(filepath)
-        pass
+        load_dotenv(filepath)
 
     def _determine_args_type_and_load(self, filepath):
         filepath = Path(filepath)
