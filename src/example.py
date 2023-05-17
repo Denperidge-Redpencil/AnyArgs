@@ -14,7 +14,7 @@ args.load_args()
 print(args)
 print(args.get_argument("Save Configuration", "To conf"))
 
-if args.get_argument("Save Configuration", "To conf"):
+if args.get_argument("Save Configuration", "To .conf"):
     args.save_to(conf_filepath="conf.conf")
 
 if args.get_argument("Save Configuration", "To .env"):

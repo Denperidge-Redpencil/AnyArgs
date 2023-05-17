@@ -7,19 +7,20 @@ from re import findall, sub
 from . import ARGTYPE_BOOLEAN, ARGTYPE_STRING, ARGTYPE_LIST
 
 def conf_id_from_string(string: str):
+    """Transform provided string into the conf-standard PascalCase"""
     id = ""
     for word in findall(r"[a-zA-Z0-9]+", string):
         id += word.capitalize()
     return id
 
 def env_id_from_string(string: str):
-    """Convert a string to an environment ID, based on examples provided at https://www.dotenv.org/docs/security/env.html"""
+    """Convert a string to a FULL UPPERCASE environment key ID, based on examples provided at https://www.dotenv.org/docs/security/env.html"""
     return "_".join(findall(r"[a-zA-Z0-9]+", string)).upper()
 
 
 class Group:
+    """The Group class, which groups arguments together for the AnyArgs class"""
     def __init__(self, argument_parser: ArgumentParser, config_parser: ConfigParser, group_name: str) -> None:
-        """Defines a group for arguments"""
         self.group_name = group_name
         self.argument_parser = argument_parser
         self.arg_group = self.argument_parser.add_argument_group(self.group_name)
@@ -28,24 +29,31 @@ class Group:
         self.conf_group = self.group_name
         self.config_parser.add_section(self.conf_group)
 
-        self.cli_flags = ["-h"]
+        self.cli_flags = ["-h", "--help"]  # By default, argparse sets -h and --help, so exclude those from usage
         self.set_arg_names = []
         
         self.defaults = dict()
 
     @property
     def argparse_args(self):
-        """Get argument_parser args"""
+        """Load & return argument_parser args"""
         return self.argument_parser.parse_args()
         
 
-    def add_argument(self, name: str, 
+    def add_argument(self, 
+                     name: str, 
                      typestring: str=ARGTYPE_STRING, 
                      help: str="", 
                      cli_flags: List = [], 
                      default: any = None):
         """
-        Name should be human readable
+        Add/define a new argument in this group
+
+        - name: human readable argument name
+        - typestring: (optional, default:ARGTYPE_STRING). Defines what sort of argument is being stored. Expects literals from argtypes.py
+        - help: (optional, default:"") Help text when calling the script CLI with -h or --help
+        - cli_flags: (optional, default:see README.md) Which flags can be used in the CLI to set the arg
+        - default: (optional, default:None) Default value for the arg  
 
         
         """
@@ -92,7 +100,7 @@ class Group:
             print("[ERR] ValueError raised when adding argument. Double check that you're not adding duplicate cli_flags")
             raise e
         
-        # If a default is defines, save it
+        # If a default is defined, save it
         if default is not None:
             self.defaults[name.lower()] = default
 
@@ -100,38 +108,43 @@ class Group:
 
 
 
-    def _get_conf_value(self, arg_id: str):
-        arg_id = conf_id_from_string(arg_id)
-        return self.config_parser[self.conf_group][arg_id] if arg_id in self.config_parser[self.conf_group] else None
+    def _get_conf_value(self, argument_name: str):
+        """Get arg value by name from config_parser"""
+        argument_name = conf_id_from_string(argument_name)
+        return self.config_parser[self.conf_group][argument_name] if argument_name in self.config_parser[self.conf_group] else None
 
-    def _set_conf_value(self, arg_id: str, value: any):
-        arg_id = conf_id_from_string(arg_id)
+    def _set_conf_value(self, argument_name: str, value: any):
+        """Set arg value by name in config_parser"""
+        argument_name = conf_id_from_string(argument_name)
         value = str(value)
-        self.config_parser.set(self.conf_group, arg_id, value)
+        self.config_parser.set(self.conf_group, argument_name, value)
 
-    def _get_argparse_value(self, arg_id: str):
+    def _get_argparse_value(self, argument_name: str):
+        """Get arg value by name from the argparse_args/CLI"""
         args = self.argparse_args
-        return getattr(args, arg_id) if hasattr(args, arg_id) else None
+        return getattr(args, argument_name) if hasattr(args, argument_name) else None
 
-    def _get_env_value(self, arg_id: str):
-        arg_id = env_id_from_string(arg_id)
-        return environ.get(arg_id, None)
+    def _get_env_value(self, argument_name: str):
+        """Get arg value by name from environment variables"""
+        argument_name = env_id_from_string(argument_name)
+        return environ.get(argument_name, None)
 
-    def _set_env_value(self, arg_id: str, value:any):
-        arg_id = env_id_from_string(arg_id)
+    def _set_env_value(self, argument_name: str, value:any):
+        """Set arg value by name into environment variables"""
+        argument_name = env_id_from_string(argument_name)
         value = str(value)
-        environ.update(arg_id, value)
+        environ.update(argument_name, value)
 
 
     def get_argument(self, human_readable_name: str):
         """
-        Gets the arg, no matter where it comes from
+        Load the argument value, no matter where it comes from
 
         Priority:
         - Highest: CLI arg
         - Middle: env variable/.env
         - Lower: conf file
-        - Fallback: default
+        - Fallback: internal default dict
         """
 
         # CLI arg
@@ -145,22 +158,13 @@ class Group:
         # default
         if value is None:
             value = self.defaults.get(human_readable_name.lower(), None)
-
-        if False:
-            # If it should be saved, do that
-            #conf[section_id][value_id] = str(value)
-            pass
             
         return value
     
     def __str__(self) -> str:
-        output_str = "\t" + self.group_name + "\n"
+        output_str = self.group_name + "\n"
         
         for arg_name in self.set_arg_names:
             output_str += f"\t- {arg_name}: {self.get_argument(arg_name)}\n"
         return output_str
     
-    def __repr__(self) -> str:
-        return self.__str__()
-
-        
