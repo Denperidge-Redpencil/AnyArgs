@@ -125,9 +125,14 @@ class Group:
         return getattr(args, argument_name) if hasattr(args, argument_name) else None
 
     def _get_env_value(self, argument_name: str):
-        """Get arg value by name from environment variables"""
-        argument_name = env_id_from_string(argument_name)
-        return environ.get(argument_name, None)
+        """Get arg value by name from environment variables. First try with env_id_from_string, otherwise with straight argument name"""        
+        id = env_id_from_string(argument_name)
+        value = environ.get(id, None)
+        
+        if value is None:
+            value = environ.get(argument_name, None)
+
+        return value
 
     def _set_env_value(self, argument_name: str, value:any):
         """Set arg value by name into environment variables"""

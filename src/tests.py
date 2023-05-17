@@ -58,8 +58,11 @@ def cleanup_test():
         remove("args.conf")
     if path.exists(".env"):
         remove(".env")
-    if "Argument" in environ.keys():
-        environ.pop("Argument")
+    
+    for key in environ.keys():
+        if key.lower() == "argument":
+            environ.pop(key)
+
 
 class Tests(TestCase):
     def test_group_adding(self):
@@ -130,12 +133,12 @@ class Tests(TestCase):
         args = setup_test(add_default_arg=True)
         args.get_group("Arguments")._set_conf_value("Argument", "Set")
 
-        self.assertIsNone(environ.get("Argument", None))
+        self.assertIsNone(environ.get("ARGUMENT", None))
         args.get_group("Arguments")._set_conf_value("Argument", "Set")
-        self.assertIsNone(environ.get("Argument", None))
+        self.assertIsNone(environ.get("ARGUMENT", None))
         
         args.save_to(env_vars=True)
-        self.assertEqual(environ.get("Argument", None), "Set")
+        self.assertEqual(environ.get("ARGUMENT", None), "Set")
 
         cleanup_test()
         

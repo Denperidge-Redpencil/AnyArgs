@@ -113,7 +113,7 @@ class AnyArgs:
 
         if load_from_cwd:
             filepaths += _glob_from_cwd("*.conf")
-            filepaths += _glob_from_cwd("*.env*")
+            filepaths += _glob_from_cwd(".env*")
 
         for filepath in filepaths:
             if exists(filepath):
