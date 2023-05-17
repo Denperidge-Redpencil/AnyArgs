@@ -65,6 +65,8 @@ args.add_group("Config").add_argument("Username", cli_flags=["--username", "--lo
 args.load_args()
 ```
 
+### (Code) Outputting 
+
 ### (Project) Clone & run tests
 ```bash
 git clone https://github.com/Denperidge-Redpencil/AnyArgs.git
@@ -88,3 +90,74 @@ cd AnyArgs
 python3 -m pip install --upgrade build setuptools
 python3 -m build && python3 -m pip install --force-reinstall ./dist/*.whl
 ```
+
+## Reference
+### Argtypes
+There are different argtypes. Defining them will change how your arguments get handled & parsed.
+
+| Argtype name      | Literal value     | Behaviour                 |
+| ----------------- | ----------------- | ------------------------- |
+| `ARGTYPE_STRING`  | `"STRING"`        | [View](#argtype_string)   |
+| `ARGTYPE_BOOLEAN` | `"BOOL"`          | [View](#argype_boolean)   |
+| `ARGTYPE_LIST`    | `"LIST"`          | [View](#argtype_list)     |
+
+#### ARGTYPE_STRING
+*Default, will be used when no argtype is defined.*
+
+Simple string storage
+##### Resulting CLI:
+
+
+
+
+#### ARGYPE_BOOLEAN
+
+
+#### ARGTYPE_LIST
+Not yet implemented.
+
+
+### Cli-flag auto-generation
+When cli-flags is undefined while defining arguments, AnyArg will try to auto-generate some. Below are some examples that illustrate how auto-generation works.
+
+```python
+args.add_group("Login").add_argument("Username", typestring=ARGTYPE_STRING).add_argument("Handle")
+```
+
+Will result in the following output syntax:
+```bash
+usage: example.py [-h] [--username USERNAME] [--handle HANDLE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Login:
+  --username USERNAME, -u USERNAME
+  --handle HANDLE
+```
+- Long-flag arg under --NAME
+- Short-flag using first letter(s) under -N
+- If an auto-generated flag would conflict with another (whether that be from the predefined `--help`/`-h` or previously added args), it does not get generated
+
+
+```python
+args.add_group("Save Configuration").add_argument("To .conf", typestring=ARGTYPE_BOOLEAN)
+```
+
+Will result in the following output syntax:
+```bash
+usage: test.py [-h] [--to-conf]
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Save Configuration:
+  --to-conf, -tc
+```
+- Long-flag arg replaces spaces with dashes (` ` -> `-`) and ignores non-letters (~~`.`~~)
+- Short-flag ignores non-letters (~~`.`~~) and uses the first letters split by spaces (` `) 
+
+
+
+
+

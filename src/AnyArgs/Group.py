@@ -76,11 +76,11 @@ class Group:
             short_flag = "-" + first_letters_dasherised
             long_flag = "--" + only_letters.replace(" ", "-")
 
-            if short_flag not in self.cli_flags and typestring != ARGTYPE_BOOLEAN:
-                flags.append(short_flag)
             if long_flag not in self.cli_flags:
                 flags.append(long_flag)
             
+            if short_flag not in self.cli_flags:
+                flags.append(short_flag)
 
         try:
             arg = self.arg_group.add_argument(*flags,
